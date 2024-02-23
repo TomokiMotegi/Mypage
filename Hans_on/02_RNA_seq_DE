@@ -1,0 +1,238 @@
+#move_working_directory
+getwd()
+rm(list = ls(all.names = T))
+
+
+
+###clustering__TCC###
+in_f = "sample_blekhman_36.txt"       #入力ファイル名を指定してin_fに格納
+out_f = "hoge1.png"                   #出力ファイル名を指定してout_fに格納
+
+library(TCC)                           #パッケージの読み込み
+data = read.table(in_f, header=TRUE, row.names=1, sep="\t", quote="")#in_fで指定したファイルの読み込み
+dim(data)                              #オブジェクトdataの行数と列数を表示
+
+out = clusterSample(data, dist.method="spearman",
+                     hclust.method="average", unique.pattern=TRUE)#クラスタリング実行結果をoutに格納
+png(out_f, pointsize=13, width=700, height=400)#出力ファイルの各種パラメータを指定
+par(mar=c(0, 4, 1, 0))                 #下、左、上、右の順で余白（行）を指定
+plot(out, sub="", xlab="", cex.lab=1.2,#樹形図(デンドログラム)の表示
+     cex=1.3, main="", ylab="Height")
+dev.off()                              #おまじない
+
+
+
+###clustering_merge_rep_TCC###
+in_f = "sample_blekhman_18.txt"       #入力ファイル名を指定してin_fに格納
+out_f = "hoge2.png"                   #出力ファイル名を指定してout_fに格納
+
+library(TCC)                           #パッケージの読み込み
+data = read.table(in_f, header=TRUE, row.names=1, sep="\t", quote="")#in_fで指定したファイルの読み込み
+dim(data)                              #オブジェクトdataの行数と列数を表示
+
+out = clusterSample(data, dist.method="spearman",#クラスタリング実行結果をoutに格納
+                     hclust.method="average", unique.pattern=TRUE)
+png(out_f, pointsize=13, width=700, height=400)#出力ファイルの各種パラメータを指定
+par(mar=c(0, 4, 1, 0))                 #下、左、上、右の順で余白（行）を指定
+plot(out, sub="", xlab="", cex.lab=1.2,#樹形図(デンドログラム)の表示
+     cex=1.3, main="", ylab="Height") 
+dev.off()                              #おまじない
+
+
+
+###clustering_bodymap_TCC###
+in_f1 = "bodymap_count_table.txt"     #入力ファイル名を指定してin_f1に格納(カウントデータ)
+in_f2 = "bodymap_phenodata.txt"       #入力ファイル名を指定してin_f2に格納(サンプルラベル情報)
+out_f = "hoge3.png"                    #出力ファイル名を指定してout_fに格納
+
+library(TCC)                           #パッケージの読み込み
+data = read.table(in_f1, header=TRUE, row.names=1, sep="\t", quote="")
+phenotype = read.table(in_f2, header=TRUE, row.names=1, sep=" ", quote="")
+phenotype                              #確認してるだけです
+colnames(data) = phenotype$tissue.type#dataオブジェクトの列名を変更
+
+out = clusterSample(data, dist.method="spearman",#クラスタリング実行結果をoutに格納
+                     hclust.method="average", unique.pattern=TRUE)
+png(out_f, pointsize=13, width=600, height=400)#出力ファイルの各種パラメータを指定
+par(mar=c(0, 4, 1, 0))                 #下、左、上、右の順で余白（行）を指定
+plot(out, sub="", xlab="", cex.lab=1.2,#樹形図(デンドログラム)の表示
+     cex=1.3, main="", ylab="Height")
+dev.off()  
+
+
+
+###Differncial_Expression_Gene_HS vs RM###
+n_f = "sample_blekhman_18.txt"       #入力ファイル名を指定してin_fに格納
+out_f1 = "hoge4.txt"                  #出力ファイル名を指定してout_f1に格納
+out_f2 = "hoge4.png"                  #出力ファイル名を指定してout_f2に格納
+param_subset = c(1, 4, 13, 16)        #取り扱いたいサブセット情報を指定
+param_G1 = 2                          #G1群のサンプル数を指定
+param_G2 = 2                          #G2群のサンプル数を指定
+param_FDR = 0.05                      #false discovery rate (FDR)閾値を指定
+
+library(TCC)                           #パッケージの読み込み
+data = read.table(in_f, header=TRUE, row.names=1, sep="\t", quote="")#in_fで指定したファイルの読み込み
+data = data[,param_subset]            #param_subsetで指定した列の情報のみ抽出
+data.cl = c(rep(1, param_G1), rep(2, param_G2))#G1群を1、G2群を2としたベクトルdata.clを作成
+tcc = new("TCC", data, data.cl)       #TCCクラスオブジェクトtccを作成
+dim(data)                              #行数と列数を表示
+head(data)                             #最初の6行分を表示
+
+#normalize
+tcc = calcNormFactors(tcc, norm.method="tmm", test.method="edger",#正規化を実行した結果をtccに格納
+                       iteration=3, FDR=0.1, floorPDEG=0.05)
+normalized = getNormalizedData(tcc)   #正規化後のデータを取り出してnormalizedに格納
+
+#Detection_DEGs
+tcc = estimateDE(tcc, test.method="edger", FDR=param_FDR)#DEG検出を実行した結果をtccに格納
+result = getResult(tcc, sort=FALSE)   #p値などの計算結果をresultに格納
+sum(tcc$stat$q.value < param_FDR)      #条件を満たす遺伝子数を表示
+
+#results
+tmp = cbind(rownames(tcc$count), normalized, result)#正規化後のデータの右側にDEG検出結果を結合したものをtmpに格納
+tmp = tmp[order(tmp$rank),]           #発現変動順にソートした結果をtmpに格納
+write.table(tmp, out_f1, sep="\t", append=F, quote=F, row.names=F)#tmpの中身を指定したファイル名で保存
+
+#M-A plot
+png(out_f2, pointsize=13, width=430, height=350)#出力ファイルの各種パラメータを指定
+par(mar=c(4, 4, 0, 0))                     #余白を指定
+plot(tcc, FDR=param_FDR, xlim=c(-2, 17), ylim=c(-10, 10),#param_FDRで指定した閾値を満たすDEGをマゼンタ色にして描画
+     cex=0.8, cex.lab=1.2,             #param_FDRで指定した閾値を満たすDEGをマゼンタ色にして描画
+     cex.axis=1.2, main="",            #param_FDRで指定した閾値を満たすDEGをマゼンタ色にして描画
+     xlab="A = (log2(G2) + log2(G1))/2",#param_FDRで指定した閾値を満たすDEGをマゼンタ色にして描画
+     ylab="M = log2(G2) - log2(G1)")   #param_FDRで指定した閾値を満たすDEGをマゼンタ色にして描画
+legend("topright", c(paste("DEG(FDR<", param_FDR, ")", sep=""), "non-DEG"),#凡例を作成
+       col=c("magenta", "black"), pch=20, cex=1.2)#凡例を作成
+dev.off()                              #おまじない
+sum(tcc$stat$q.value < 0.05)           #FDR < 0.05を満たす遺伝子数を表示
+sum(tcc$stat$q.value < 0.10)           #FDR < 0.10を満たす遺伝子数を表示
+sum(tcc$stat$q.value < 0.20)           #FDR < 0.20を満たす遺伝子数を表示
+sum(tcc$stat$q.value < 0.30)           #FDR < 0.30を満たす遺伝子数を表示
+
+
+###Differncial_Expression_Gene_HS vs PT###
+in_f = "sample_blekhman_18.txt"       #入力ファイル名を指定してin_fに格納
+out_f1 = "hoge5.txt"                  #出力ファイル名を指定してout_f1に格納
+out_f2 = "hoge5.png"                  #出力ファイル名を指定してout_f2に格納
+param_subset = c(1, 4, 7, 10)         #取り扱いたいサブセット情報を指定
+param_G1 = 2                          #G1群のサンプル数を指定
+param_G2 = 2                          #G2群のサンプル数を指定
+param_FDR = 0.05                      #false discovery rate (FDR)閾値を指定
+
+library(TCC)                           #パッケージの読み込み
+data = read.table(in_f, header=TRUE, row.names=1, sep="\t", quote="")#in_fで指定したファイルの読み込み
+data = data[,param_subset]            #param_subsetで指定した列の情報のみ抽出
+data.cl = c(rep(1, param_G1), rep(2, param_G2))#G1群を1、G2群を2としたベクトルdata.clを作成
+tcc = new("TCC", data, data.cl)       #TCCクラスオブジェクトtccを作成
+
+#normalize
+tcc = calcNormFactors(tcc, norm.method="tmm", test.method="edger",#正規化を実行した結果をtccに格納
+                       iteration=3, FDR=0.1, floorPDEG=0.05)
+normalized = getNormalizedData(tcc)   #正規化後のデータを取り出してnormalizedに格納
+
+#Detection_DEGs
+tcc = estimateDE(tcc, test.method="edger", FDR=param_FDR)#DEG検出を実行した結果をtccに格納
+result = getResult(tcc, sort=FALSE)   #p値などの計算結果をresultに格納
+
+#results
+tmp = cbind(rownames(tcc$count), normalized, result)#正規化後のデータの右側にDEG検出結果を結合したものをtmpに格納
+tmp = tmp[order(tmp$rank),]           #発現変動順にソートした結果をtmpに格納
+write.table(tmp, out_f1, sep="\t", append=F, quote=F, row.names=F)#tmpの中身を指定したファイル名で保存
+
+#M-A plot
+png(out_f2, pointsize=13, width=430, height=350)#出力ファイルの各種パラメータを指定
+par(mar=c(4, 4, 0, 0))                     #余白を指定
+plot(tcc, FDR=param_FDR, xlim=c(-2, 17), ylim=c(-10.0, 11.5),#param_FDRで指定した閾値を満たすDEGをマゼンタ色にして描画
+     cex=0.8, cex.lab=1.2,             #param_FDRで指定した閾値を満たすDEGをマゼンタ色にして描画
+     cex.axis=1.2, main="",            #param_FDRで指定した閾値を満たすDEGをマゼンタ色にして描画
+     xlab="A = (log2(G2) + log2(G1))/2",#param_FDRで指定した閾値を満たすDEGをマゼンタ色にして描画
+     ylab="M = log2(G2) - log2(G1)")   #param_FDRで指定した閾値を満たすDEGをマゼンタ色にして描画
+legend("topright", c(paste("DEG(FDR<", param_FDR, ")", sep=""), "non-DEG"),#凡例を作成
+       col=c("magenta", "black"), pch=20, cex=1.2)#凡例を作成
+dev.off()                              #おまじない
+sum(tcc$stat$q.value < 0.05)           #FDR < 0.05を満たす遺伝子数を表示
+sum(tcc$stat$q.value < 0.10)           #FDR < 0.10を満たす遺伝子数を表示
+sum(tcc$stat$q.value < 0.20)           #FDR < 0.20を満たす遺伝子数を表示
+sum(tcc$stat$q.value < 0.30)           #FDR < 0.30を満たす遺伝子数を表示
+
+
+
+###maqc_biorep2_techrep7###
+in_f1 = "maqc_count_table.txt"        #入力ファイル名を指定してin_f1に格納(カウントデータ)
+in_f2 = "maqc_phenodata.txt"          #入力ファイル名を指定してin_f2に格納(サンプルラベル情報)
+out_f = "hoge6.png"                    #出力ファイル名を指定してout_fに格納
+param_fig = c(600, 400)               #ファイル出力時の横幅と縦幅を指定(単位はピクセル)
+
+library(TCC)                           #パッケージの読み込み
+data = read.table(in_f1, header=TRUE, row.names=1, sep="\t", quote="")
+phenotype = read.table(in_f2, header=TRUE, row.names=1, sep=" ", quote="")
+phenotype                              #確認してるだけです
+colnames(data) = phenotype$tissue     #dataオブジェクトの列名を変更
+
+out = clusterSample(data, dist.method="spearman",
+                     hclust.method="average", unique.pattern=TRUE)#クラスタリング実行結果をoutに格納
+
+png(out_f, pointsize=13, width=600, height=400)#出力ファイルの各種パラメータを指定
+par(mar=c(0, 4, 1, 0))                 #下、左、上、右の順で余白（行）を指定
+plot(out, sub="", xlab="", cex.lab=1.2,#樹形図(デンドログラム)の表示
+     cex=1.3, main="", ylab="Height")     #樹形図(デンドログラム)の表示
+dev.off()                              #おまじない
+
+
+
+###maqc(pooled)_DEGs_rep_edgeR###
+in_f = "maqc_count_table.txt"         #入力ファイル名を指定してin_fに格納
+out_f1 = "hoge7.txt"                  #出力ファイル名を指定してout_f1に格納
+out_f2 = "hoge7.png"                  #出力ファイル名を指定してout_f2に格納
+param_G1 = 7                          #G1群のサンプル数を指定
+param_G2 = 7                          #G2群のサンプル数を指定
+param_FDR = 0.05                      #false discovery rate (FDR)閾値を指定
+
+library(TCC)                           #パッケージの読み込み
+data = read.table(in_f, header=TRUE, row.names=1, sep="\t", quote="")#in_fで指定したファイルの読み込み
+data.cl = c(rep(1, param_G1), rep(2, param_G2))#G1群を1、G2群を2としたベクトルdata.clを作成
+tcc = new("TCC", data, data.cl)       #TCCクラスオブジェクトtccを作成
+
+#normalize
+tcc = calcNormFactors(tcc, norm.method="tmm", test.method="edger",#正規化を実行した結果をtccに格納
+                       iteration=3, FDR=0.1, floorPDEG=0.05)#正規化を実行した結果をtccに格納
+
+#Detection_DEGs
+tcc = estimateDE(tcc, test.method="edger", FDR=param_FDR)#DEG検出を実行した結果をtccに格納
+result = getResult(tcc, sort=FALSE)   #p値などの計算結果をresultに格納
+
+#results
+tmp = cbind(rownames(tcc$count), tcc$count, result)#入力データの右側にDEG検出結果を結合したものをtmpに格納
+write.table(tmp, out_f1, sep="\t", append=F, quote=F, row.names=F)#tmpの中身を指定したファイル名で保存
+
+#M-A plot
+png(out_f2, pointsize=13, width=430, height=350)#出力ファイルの各種パラメータを指定
+par(mar=c(4, 4, 0, 0))                 #余白を指定
+plot(tcc, FDR=param_FDR, main="",      #param_FDRで指定した閾値を満たすDEGをマゼンタ色にして描画
+     xlab="A = (log2(G2) + log2(G1))/2",#閾値を満たすDEGをマゼンタ色にして描画
+     ylab="M = log2(G2) - log2(G1)")   #閾値を満たすDEGをマゼンタ色にして描画
+legend("topright", c(paste("DEG(FDR =", param_FDR, ")", sep=""), "non-DEG"),#凡例を作成
+       col=c("magenta", "black"), pch=20)#凡例を作成
+dev.off()                              #おまじない
+sum(tcc$stat$q.value < 0.05)           #FDR = 0.05 (q-value < 0.05)を満たす遺伝子数を表示
+sum(tcc$stat$q.value < 0.10)           #FDR = 0.10 (q-value < 0.10)を満たす遺伝子数を表示
+sum(tcc$stat$q.value < 0.20)           #FDR = 0.20 (q-value < 0.20)を満たす遺伝子数を表示
+sum(tcc$stat$q.value < 0.30)           #FDR = 0.30 (q-value < 0.30)を満たす遺伝子数を表示
+
+
+###maqc(pooled)_DEGs_no_rep###
+in_f = "maqc_pooledreps_count_table.txt"#入力ファイル名を指定してin_fに格納
+out_f1 = "hoge9.txt"                  #出力ファイル名を指定してout_f1に格納
+out_f2 = "hoge9.png"                  #出力ファイル名を指定してout_f2に格納
+param_G1 = 1                          #G1群のサンプル数を指定
+param_G2 = 1                          #G2群のサンプル数を指定
+param_FDR = 0.05                      #false discovery rate (FDR)閾値を指定
+
+library(TCC)                           #パッケージの読み込み
+data = read.table(in_f, header=TRUE, row.names=1, sep="\t", quote="")#in_fで指定したファイルの読み込み
+data.cl = c(rep(1, param_G1), rep(2, param_G2))#G1群を1、G2群を2としたベクトルdata.clを作成
+tcc = new("TCC", data, data.cl)       #TCCクラスオブジェクトtccを作成
+
+#normalize
+tcc = calcNormFactors(tcc, norm.method="deseq2", test.method="deseq2",#正規化を実行した結果をtccに格納
+                       iteration=3, FDR=0.1, floorPDEG=0.05)#正規化を実行した結果をtccに格納
