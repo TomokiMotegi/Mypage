@@ -22,15 +22,22 @@ R CMD BATCH --slave --vanilla  install_packages.R
 ### Micorarray directory ###
 mkdir -p 01_Microarray
 curl -L "https://drive.usercontent.google.com/download?id=1mjdKuCdxDauInbcJnlaJliqPV-uy_DKj&confirm=xxx" -o ./01_Microarray/NEJM_CEL.tar;
+curl -L "https://drive.usercontent.google.com/download?id=1y0EsDU8qlbmPyDWwBP5rMa7qRzF5rc6r&confirm=xxx" -o ./01_Microarray/NEJM.tar;
 cd 01_Microarray;
 tar -xvf NEJM_CEL.tar;
+tar -xvf NEJM.tar;
 cd ../;
 
 
 
 ### Differential_Expression directory ###
 mkdir -p 02_Differential_Expression
-curl -L "https://drive.usercontent.google.com/download?id=1ScH6hC5Fs7LjbX7YOFvriNCsKdNkCT6P&confirm=xxx" -o ./02_Differential_Expression/chr22_Fastq.tar.gz;
+curl -L "https://drive.usercontent.google.com/download?id=1Iod8_l8UCTRO636P2xnvjDzgrcOmk2bt&confirm=xxx" -o ./02_Differential_Expression/DE_data.tar;
+cd 02_Differential_Expression;
+tar -xvf DE_data.tar;
+mv ./DE_data/* ./
+rm -rf ./DE_data
+cd ../
 
 
 
