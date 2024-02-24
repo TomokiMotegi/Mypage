@@ -61,7 +61,7 @@ curl -L "https://drive.usercontent.google.com/download?id=1OEdutpohch4-5AZ1FB9Pt
 cd 03_Fastq_Trimming;
 tar -xvf Fastq.tar;
 # DL fastp binary file
-curl http://opengene.org/fastp/fastp.0.23.4
+curl http://opengene.org/fastp/fastp.0.23.4 -o fastp.0.23.4;
 chmod a+x ./fastp.0.23.4
 cd ../
 
@@ -86,17 +86,17 @@ sudo ln -s /opt/homebrew/bin/python3 /opt/homebrew/bin/python
 
 ## DL HISAT2 binary packages https://daehwankimlab.github.io/hisat2/download/ ##
 # if you use Mac OSX
-curl https://cloud.biohpc.swmed.edu/index.php/s/zMgEtnF6LjnjFrr/download
+curl https://cloud.biohpc.swmed.edu/index.php/s/zMgEtnF6LjnjFrr/download -o ./download;
 # if you use Linux
-curl https://cloud.biohpc.swmed.edu/index.php/s/oTtGWbWjaxsQ2Ho/download
+curl https://cloud.biohpc.swmed.edu/index.php/s/oTtGWbWjaxsQ2Ho/download  -o ./download;
 unzip download
 
 ## DL chromosome 22 fasta file ##
-curl https://ftp.ensembl.org/pub/release-111/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.chromosome.22.fa.gz
+curl https://ftp.ensembl.org/pub/release-111/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.chromosome.22.fa.gz  -o ./Homo_sapiens.GRCh38.dna.chromosome.22.fa.gz;
 gunzip Homo_sapiens.GRCh38.dna.chromosome.22.fa.gz;
 
 ## DL gene feature format (GTF) file for humans ##
-curl https://ftp.ensembl.org/pub/release-111/gtf/homo_sapiens/Homo_sapiens.GRCh38.111.gtf.gz
+curl https://ftp.ensembl.org/pub/release-111/gtf/homo_sapiens/Homo_sapiens.GRCh38.111.gtf.gz -o ./Homo_sapiens.GRCh38.111.gtf.gz;
 gunzip Homo_sapiens.GRCh38.111.gtf.gz
 # Extract chr22 regions
 cat Homo_sapiens.GRCh38.111.gtf |grep "^22" >Homo_sapiens.GRCh38.111_chr22.gtf
@@ -108,7 +108,7 @@ cat Homo_sapiens.GRCh38.111.gtf |grep "^22" >Homo_sapiens.GRCh38.111_chr22.gtf
 
 
 ## DL RSEM and compiling ##
-curl https://github.com/deweylab/RSEM/archive/refs/tags/v1.3.3.tar.gz
+curl https://github.com/deweylab/RSEM/archive/refs/tags/v1.3.3.tar.gz -o ./v1.3.3.tar.gz;
 tar -zxvf v1.3.3.tar.gz;
 cd RSEM-1.3.3;
 make
