@@ -10,7 +10,7 @@ ls ./chr22_Fastq/*_alignable_1.fq |xargs -I {} basename {} .fq |perl -pe s/_alig
 
 # if you have enough memory and threads try as below
 ls ./chr22_Fastq/*_alignable_1.fq |xargs -I {} basename {} .fq |perl -pe s/_alignable_1//g|sort|uniq|xargs -I {} mkdir -p {}
-ls ./chr22_Fastq/*_alignable_1.fq |xargs -I {} basename {} .fq |perl -pe s/_alignable_1//g|xargs -I {} bash -c "nohup ./RSEM-1.3.3/rsem-calculate-expression --paired-end --hisat2-hca --hisat2-path /restricted/projectnb/camplab/home/tmotegi/Statistics/RNA_seq_Training/hisat2-2.2.1 --estimate-rspd --calc-ci --ci-memory 4096 --append-names --output-genome-bam ./chr22_Fastq/{}_alignable_1.fq ./chr22_Fastq/{}_alignable_2.fq ./hg38_hisat2/hg38_chr22 ./{}/{} &"
+ls ./chr22_Fastq/*_alignable_1.fq |xargs -I {} basename {} .fq |perl -pe s/_alignable_1//g|xargs -I {} bash -c "nohup ./RSEM-1.3.3/rsem-calculate-expression --paired-end --hisat2-hca --hisat2-path ./hisat2-2.2.1 --estimate-rspd --calc-ci --ci-memory 4096 --append-names --output-genome-bam ./chr22_Fastq/{}_alignable_1.fq ./chr22_Fastq/{}_alignable_2.fq ./hg38_hisat2/hg38_chr22 ./{}/{} &"
 
 
 ### add sample name and data collection ###
