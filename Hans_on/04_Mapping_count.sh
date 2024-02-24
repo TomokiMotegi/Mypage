@@ -3,7 +3,7 @@ ls ./chr22_Fastq/*_alignable_1.fq |xargs -I {} basename {} .fq |perl -pe s/_alig
 #　--hisat2-hcaは --no-softclipなのでfastqのadapter trimmingが必要になる
 # 16 threads 256 GB in 8 min
 ./RSEM-1.3.3/rsem-calculate-expression --paired-end --hisat2-hca \
- --hisat2-path /restricted/projectnb/camplab/home/tmotegi/Statistics/RNA_seq_Training/hisat2-2.2.1 \
+ --hisat2-path ./hisat2-2.2.1 \
  --estimate-rspd --calc-ci --ci-memory 4096 --append-names --output-genome-bam \
  ./chr22_Fastq/ERR204882_alignable_1.fq ./chr22_Fastq/ERR204882_alignable_2.fq \
  ./hg38_hisat2/hg38_chr22 ./ERR204882/ERR204882;
