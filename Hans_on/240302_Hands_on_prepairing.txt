@@ -86,10 +86,10 @@ sudo ln -s /opt/homebrew/bin/python3 /opt/homebrew/bin/python
 
 ## DL HISAT2 binary packages https://daehwankimlab.github.io/hisat2/download/ ##
 # if you use Mac OSX
-curl https://cloud.biohpc.swmed.edu/index.php/s/zMgEtnF6LjnjFrr/download -o ./download;
+curl https://cloud.biohpc.swmed.edu/index.php/s/zMgEtnF6LjnjFrr/download -o ./download.zip;
 # if you use Linux
-curl https://cloud.biohpc.swmed.edu/index.php/s/oTtGWbWjaxsQ2Ho/download  -o ./download;
-unzip download
+curl https://cloud.biohpc.swmed.edu/index.php/s/oTtGWbWjaxsQ2Ho/download  -o ./download.zip;
+unzip download.zip
 
 ## DL chromosome 22 fasta file ##
 curl https://ftp.ensembl.org/pub/release-111/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.chromosome.22.fa.gz  -o ./Homo_sapiens.GRCh38.dna.chromosome.22.fa.gz;
