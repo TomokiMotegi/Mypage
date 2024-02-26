@@ -82,7 +82,7 @@ g++ --version
 sudo apt install python-is-python3
 
 # if you use MacOS
-sudo ln -s /opt/homebrew/bin/python3 /opt/homebrew/bin/python
+# sudo ln -s /opt/homebrew/bin/python3 /opt/homebrew/bin/python
 
 ## DL HISAT2 binary packages https://daehwankimlab.github.io/hisat2/download/ ##
 # if you use Mac OSX
