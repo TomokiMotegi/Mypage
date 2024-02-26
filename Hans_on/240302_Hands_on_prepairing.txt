@@ -108,7 +108,7 @@ cat Homo_sapiens.GRCh38.111.gtf |grep "^22" >Homo_sapiens.GRCh38.111_chr22.gtf
 
 
 ## DL RSEM and compiling ##
-curl -L https://github.com/deweylab/RSEM/archive/refs/tags/v1.3.3.tar.gz -o ./v1.3.3.tar.gz;
+curl -L "https://drive.usercontent.google.com/download?id=19ETTHgYLBUEvfnECSJRVMK1Q1Di7g1mN&confirm=xxx" -o ./v1.3.3.tar.gz;
 tar -zxvf v1.3.3.tar.gz;
 cd RSEM-1.3.3;
 make
