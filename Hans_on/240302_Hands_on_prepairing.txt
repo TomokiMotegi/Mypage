@@ -78,6 +78,7 @@ tar -zxvf chr22_Fastq.tar.gz;
 perl -v
 python -V
 g++ --version
+echo -e '#include <boost/version.hpp>\nBOOST_VERSION' | cpp -P
 # if you use WSL
 sudo apt install python-is-python3
 
