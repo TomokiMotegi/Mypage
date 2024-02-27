@@ -83,6 +83,11 @@ echo -e '#include <boost/version.hpp>\nBOOST_VERSION' | cpp -P
 sudo apt install python-is-python3
 
 # if you use MacOS
+# ls -la /usr/local/bin | grep python
+# alias python="python3"
+# echo $PATH
+# export PATH="$PATH:/Users/tsuyoshi/.pyenv/shims/python"
+# sudo ln -s /Users/tsuyoshi/.pyenv/shims/python /usr/bin/python
 # sudo ln -s /opt/homebrew/bin/python3 /opt/homebrew/bin/python
 
 ## DL HISAT2 binary packages https://daehwankimlab.github.io/hisat2/download/ ##
