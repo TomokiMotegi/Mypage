@@ -87,8 +87,8 @@ sudo apt install python-is-python3 ;
 # alias python="python3"
 # echo $PATH
 # export PATH="$PATH:/Users/tsuyoshi/.pyenv/shims/python"
-# sudo ln -s /Users/tsuyoshi/.pyenv/shims/python /usr/bin/python
-# sudo ln -s /opt/homebrew/bin/python3 /opt/homebrew/bin/python
+# sudo ln -s -f /Users/tsuyoshi/.pyenv/shims/python /usr/bin/python
+# sudo ln -s -f /opt/homebrew/bin/python3 /opt/homebrew/bin/python
 
 ## DL HISAT2 binary packages https://daehwankimlab.github.io/hisat2/download/ ##
 # if you use Mac OSX
