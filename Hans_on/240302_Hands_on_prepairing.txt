@@ -92,9 +92,9 @@ sudo apt install python-is-python3 ;
 
 ## DL HISAT2 binary packages https://daehwankimlab.github.io/hisat2/download/ ##
 # if you use Mac OSX
-curl https://cloud.biohpc.swmed.edu/index.php/s/zMgEtnF6LjnjFrr/download -o ./download.zip;
+curl -L https://cloud.biohpc.swmed.edu/index.php/s/zMgEtnF6LjnjFrr/download -o ./download.zip;
 # if you use Linux
-curl https://cloud.biohpc.swmed.edu/index.php/s/oTtGWbWjaxsQ2Ho/download  -o ./download.zip;
+curl -L https://cloud.biohpc.swmed.edu/index.php/s/oTtGWbWjaxsQ2Ho/download  -o ./download.zip;
 unzip download.zip ;
 
 ## DL chromosome 22 fasta file ##
