@@ -112,7 +112,6 @@ cat Homo_sapiens.GRCh38.111.gtf |grep "^22" >Homo_sapiens.GRCh38.111_chr22.gtf ;
 # mkdir -p hg38_test
 # ./hisat2-2.2.1/hisat2-build Homo_sapiens.GRCh38.dna.chromosome.22.fa ./hg38_test/hg38_chr22;
 
-
 ## DL RSEM and compiling ##
 # for Linux (WSL) user 
 curl -L "https://drive.usercontent.google.com/download?id=1lDnQgGO1rwbGFYHhb-7vDmRJExbNF0tI&confirm=xxx" -o ./v1.3.3.tar.gz;
