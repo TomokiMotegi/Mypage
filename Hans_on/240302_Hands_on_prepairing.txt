@@ -114,7 +114,11 @@ cat Homo_sapiens.GRCh38.111.gtf |grep "^22" >Homo_sapiens.GRCh38.111_chr22.gtf ;
 
 
 ## DL RSEM and compiling ##
+# for Linux (WSL) user 
 curl -L "https://drive.usercontent.google.com/download?id=1lDnQgGO1rwbGFYHhb-7vDmRJExbNF0tI&confirm=xxx" -o ./v1.3.3.tar.gz;
+
+# for MacOS user 
+curl -L "https://drive.usercontent.google.com/download?id=1JQPT0T4ql6WIsZ1O05sIbCpag3gTRs-o&confirm=xxx" -o ./v1.3.3.tar.gz;
 tar -zxvf v1.3.3.tar.gz;
 cd RSEM-1.3.3;
 make ;
