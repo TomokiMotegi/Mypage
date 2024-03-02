@@ -1,7 +1,7 @@
 #move_working_directory
 getwd()
 rm(list = ls(all.names = T))
-
+setwd("./RNA_seq_Training/01_Microarray/NEJM/")
 
 #clustering_rma
 data = read.table("hoge_rma.txt", header=TRUE, row.names=1, sep="\t", quote="")
