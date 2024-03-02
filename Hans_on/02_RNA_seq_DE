@@ -1,6 +1,7 @@
 #move_working_directory
 getwd()
 rm(list = ls(all.names = T))
+setwd("../02_Differential_Expression")
 
 
 
