@@ -89,8 +89,8 @@ sudo apt install python-is-python3 ;
 # export PATH="$PATH:/Users/tsuyoshi/.pyenv/shims/python"
 # sudo ln -s -f /Users/tsuyoshi/.pyenv/shims/python /usr/bin/python
 # sudo ln -s -f /opt/homebrew/bin/python3 /opt/homebrew/bin/python]
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-brew install pyenv
+# /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+# brew install pyenv
 
 ## DL HISAT2 binary packages https://daehwankimlab.github.io/hisat2/download/ ##
 # if you use Mac OSX
