@@ -1,0 +1,132 @@
+### Prepare data and analyzing folder ###
+### Main directory ###
+mkdir -p RNA_seq_Training;
+cd RNA_seq_Training;
+
+## Making analyzing enviroment
+## if you have already install R and RStuido, this command skip to install_packages.R
+# if you use Ubuntu　in WSL
+sudo apt update;
+sudo apt install -y libnss3;
+sudo apt-get install -y libgbm-dev;
+sudo apt-get install -y libasound2;
+sudo apt install libcurl4-openssl-dev;
+sudo apt install libxml2-dev;
+sudo apt install -y r-base r-base-dev;
+wget https://s3.amazonaws.com/rstudio-ide-build/electron/jammy/amd64/rstudio-2022.07.2-576-amd64.deb;
+sudo dpkg -i rstudio-2022.07.2-576-amd64.deb;
+rm -rf rstudio-202*;
+
+# if you use MacOS 12
+# すでにRとRstudioが入っていて、特にインストールする必要がない人は不要です。
+sudo brew install r-base-core;
+curl -L https://download1.rstudio.org/electron/macos/RStudio-2023.12.1-402.dmg;
+sudo brew install ./RStudio-2023.12.1-402.dmg;
+rm -rf RStudio-202*;
+
+# insall essential R packages for RNA-seq
+curl -L "https://drive.usercontent.google.com/download?id=1x90KPXoy3yZRcsXXE2cPTf6xwkTxGNTh&confirm=xxx" -o install_packages.R;
+Rscript install_packages.R;
+
+
+
+### Micorarray directory ###
+mkdir -p 01_Microarray;
+curl -L "https://drive.usercontent.google.com/download?id=1mjdKuCdxDauInbcJnlaJliqPV-uy_DKj&confirm=xxx" -o ./01_Microarray/NEJM_CEL.tar;
+curl -L "https://drive.usercontent.google.com/download?id=1y0EsDU8qlbmPyDWwBP5rMa7qRzF5rc6r&confirm=xxx" -o ./01_Microarray/NEJM.tar;
+cd 01_Microarray;
+tar -xvf NEJM_CEL.tar;
+tar -xvf NEJM.tar;
+cd ../;
+
+
+
+### Differential_Expression directory ###
+mkdir -p 02_Differential_Expression;
+curl -L "https://drive.usercontent.google.com/download?id=1Iod8_l8UCTRO636P2xnvjDzgrcOmk2bt&confirm=xxx" -o ./02_Differential_Expression/DE_data.tar;
+cd 02_Differential_Expression;
+tar -xvf DE_data.tar;
+mv ./DE_data/* ./ ;
+rm -rf ./DE_data ;
+cd ../ ;
+
+
+
+### Fastq_Trimming directory ###
+mkdir -p 03_Fastq_Trimming;
+# if you have enough strage, please try DL
+# ファイルが27GBあるので、ダウンロードに余裕があって、かつTrimmingをやってみたい人様です
+curl -L "https://drive.usercontent.google.com/download?id=1OEdutpohch4-5AZ1FB9Pt8F9iEJwoNBC&confirm=xxx" -o ./03_Fastq_Trimming/Fastq.tar;
+
+cd 03_Fastq_Trimming;
+tar -xvf Fastq.tar;
+# DL fastp binary file
+curl -L http://opengene.org/fastp/fastp.0.23.4 -o fastp.0.23.4;
+chmod a+x ./fastp.0.23.4 ;
+cd ../ ;
+
+
+
+### Mapping_count directory ###
+mkdir -p 04_Mapping_count ;
+curl -L "https://drive.usercontent.google.com/download?id=1ScH6hC5Fs7LjbX7YOFvriNCsKdNkCT6P&confirm=xxx" -o ./04_Mapping_count/chr22_Fastq.tar.gz;
+
+cd 04_Mapping_count;
+tar -zxvf chr22_Fastq.tar.gz;
+# check RSEM environment
+# g++ (GCC) >6.5.0, Perl version >= 5.8.8, Python version >= 2.7.3, R version >= 3.3.1
+perl -v ;
+python -V ;
+g++ --version ;
+echo -e '#include <boost/version.hpp>\nBOOST_VERSION' | cpp -P ;
+# if you use WSL
+sudo apt install python-is-python3 ;
+
+# if you use MacOS
+# ls -la /usr/local/bin | grep python
+# alias python="python3"
+# echo $PATH
+# export PATH="$PATH:/Users/tsuyoshi/.pyenv/shims/python"
+# sudo ln -s -f /Users/tsuyoshi/.pyenv/shims/python /usr/bin/python
+# sudo ln -s -f /opt/homebrew/bin/python3 /opt/homebrew/bin/python]
+# /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+# brew install pyenv
+
+## DL HISAT2 binary packages https://daehwankimlab.github.io/hisat2/download/ ##
+# if you use Mac OSX
+curl -L https://cloud.biohpc.swmed.edu/index.php/s/zMgEtnF6LjnjFrr/download -o ./download.zip;
+# if you use Linux
+curl -L https://cloud.biohpc.swmed.edu/index.php/s/oTtGWbWjaxsQ2Ho/download  -o ./download.zip;
+unzip download.zip ;
+
+## DL chromosome 22 fasta file ##
+curl -L https://ftp.ensembl.org/pub/release-111/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.chromosome.22.fa.gz  -o ./Homo_sapiens.GRCh38.dna.chromosome.22.fa.gz;
+gunzip Homo_sapiens.GRCh38.dna.chromosome.22.fa.gz;
+
+## DL gene feature format (GTF) file for humans ##
+curl -L https://ftp.ensembl.org/pub/release-111/gtf/homo_sapiens/Homo_sapiens.GRCh38.111.gtf.gz -o ./Homo_sapiens.GRCh38.111.gtf.gz;
+gunzip Homo_sapiens.GRCh38.111.gtf.gz;
+# Extract chr22 regions
+cat Homo_sapiens.GRCh38.111.gtf |grep "^22" >Homo_sapiens.GRCh38.111_chr22.gtf ;
+
+## making hisat2 reference ##
+# Do not require this pipeline
+# mkdir -p hg38_test
+# ./hisat2-2.2.1/hisat2-build Homo_sapiens.GRCh38.dna.chromosome.22.fa ./hg38_test/hg38_chr22;
+
+## DL RSEM and compiling ##
+# for Linux (WSL) user 
+curl -L "https://drive.usercontent.google.com/download?id=1lDnQgGO1rwbGFYHhb-7vDmRJExbNF0tI&confirm=xxx" -o ./v1.3.3.tar.gz;
+
+# for MacOS user 
+curl -L "https://drive.usercontent.google.com/download?id=1JQPT0T4ql6WIsZ1O05sIbCpag3gTRs-o&confirm=xxx" -o ./v1.3.3.tar.gz;
+
+tar -zxvf v1.3.3.tar.gz;
+cd RSEM-1.3.3;
+make ;
+cd ../ ;
+# making hisat2 reference via RSEM
+mkdir -p hg38_hisat2 ;
+./RSEM-1.3.3/rsem-refseq-extract-primary-assembly Homo_sapiens.GRCh38.dna.chromosome.22.fa Homo_sapiens.GRCh38.dna.chromosome.22_rsem.fa;
+./RSEM-1.3.3/rsem-prepare-reference --gtf Homo_sapiens.GRCh38.111_chr22.gtf -p 6 --hisat2-hca --hisat2-path ./hisat2-2.2.1 Homo_sapiens.GRCh38.dna.chromosome.22.fa ./hg38_hisat2/hg38_chr22;
+
