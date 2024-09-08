@@ -47,5 +47,5 @@ download.file(url = Master_Data, destfile = o3, method = "curl")
 ## Sample Info ##
 Sample_data = "https://drive.usercontent.google.com/download?id=1n20_KxvuXA-dd1BkDNSW7tXjlQGvDtR9&confirm=xxx"
 o4 = "Sample_Info.txt"
-download.file(url = Sample_data, destfile = o3, method = "curl")
+download.file(url = Sample_data, destfile = o4, method = "curl")
 
