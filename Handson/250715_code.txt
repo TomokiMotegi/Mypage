@@ -1,0 +1,84 @@
+### Fastq_Trimming directory ###
+mkdir -p 03_Fastq_Trimming;
+# if you have enough strage, please try DL
+# ファイルが27GBあるので、ダウンロードに余裕があって、かつTrimmingをやってみたい人様です
+curl -L "https://drive.usercontent.google.com/download?id=1OEdutpohch4-5AZ1FB9Pt8F9iEJwoNBC&confirm=xxx" -o ./03_Fastq_Trimming/Fastq.tar;
+
+cd 03_Fastq_Trimming;
+tar -xvf Fastq.tar;
+singularity exec /lustre10/singularity/images/biotools_20200207/f/fastp\:0.20.1--h8b12597_0 fastp -h
+mkdir -p ./Trimmed_Fastq
+mkdir -p ./Trimmed_Report
+singularity exec /lustre10/singularity/images/biotools_20200207/f/fastp\:0.20.1--h8b12597_0 fastp -i ./Fastq/ERR204882_1.fastq.gz -I ./Fastq/ERR204882_2.fastq.gz -3 -o ./Trimmed_Fastq/ERR204882_Trimmed_R1.fastq.gz -O ./Trimmed_Fastq/ERR204882_Trimmed_R2.fastq.gz -h ./Trimmed_Report/ERR204882_trimmed_report_fastp.html -j ./Trimmed_Report/ERR204882_trimmed_report_fastp.json -q 30 -n 10 -t 1 -T 1 -l 20 -w 4;
+
+# if you have enough memory
+ls ./Fastq/*_1.fastq.gz|xargs -I {} basename {} .fastq.gz|perl -pe s/_1//g| xargs -I {} -P 7 singularity exec /lustre10/singularity/images/biotools_20200207/f/fastp\:0.20.1--h8b12597_0 fastp -i ./Fastq/{}_1.fastq.gz -I ./Fastq/{}_2.fastq.gz -3 -o ./Trimmed_Fastq/{}_Trimmed_R1.fastq.gz -O ./Trimmed_Fastq/{}_Trimmed_R2.fastq.gz -h ./Trimmed_Report/{}_trimmed_report_fastp.html -j ./Trimmed_Report/{}_trimmed_report_fastp.json -q 30 -n 10 -t 1 -T 1 -l 20 -w 6
+
+
+# Generalized QC reports
+singularity exec /lustre10/singularity/images/biotools_20200207/m/multiqc\:1.9--py_1 multiqc ./Trimmed_Report/ -o ./Trimmed_Report/;
+
+cd ../;
+
+
+
+### Mapping_count directory ###
+mkdir -p 04_Mapping_count ;
+curl -L "https://drive.usercontent.google.com/download?id=1ScH6hC5Fs7LjbX7YOFvriNCsKdNkCT6P&confirm=xxx" -o ./04_Mapping_count/chr22_Fastq.tar.gz;
+
+cd 04_Mapping_count;
+tar -zxvf chr22_Fastq.tar.gz;
+
+
+## DL chromosome 22 fasta file ##
+curl -L https://ftp.ensembl.org/pub/release-111/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.chromosome.22.fa.gz  -o ./Homo_sapiens.GRCh38.dna.chromosome.22.fa.gz;
+gunzip Homo_sapiens.GRCh38.dna.chromosome.22.fa.gz;
+
+## DL gene feature format (GTF) file for humans ##
+curl -L https://ftp.ensembl.org/pub/release-111/gtf/homo_sapiens/Homo_sapiens.GRCh38.111.gtf.gz -o ./Homo_sapiens.GRCh38.111.gtf.gz;
+gunzip Homo_sapiens.GRCh38.111.gtf.gz;
+# Extract chr22 regions
+cat Homo_sapiens.GRCh38.111.gtf |grep "^22" >Homo_sapiens.GRCh38.111_chr22.gtf ;
+
+
+## Complie RSEM ##
+wget https://github.com/deweylab/RSEM/archive/refs/tags/v1.3.3.tar.gz
+
+tar -zxvf v1.3.3.tar.gz;
+cd RSEM-1.3.3;
+make ;
+cd ../ ;
+
+## DL STAR aligner ##
+tar -zxvf 2.7.3a.tar.gz;
+cd STAR-2.7.3a/source;
+make
+cd ../../
+
+# making STAR reference via RSEM
+mkdir -p hg38_STAR ;
+./RSEM-1.3.3/rsem-refseq-extract-primary-assembly Homo_sapiens.GRCh38.dna.chromosome.22.fa Homo_sapiens.GRCh38.dna.chromosome.22_rsem.fa;
+./RSEM-1.3.3/rsem-prepare-reference --gtf Homo_sapiens.GRCh38.111_chr22.gtf -p 16 --star --star-path ./STAR-2.7.3a/source Homo_sapiens.GRCh38.dna.chromosome.22.fa ./hg38_STAR/hg38_STAR;
+
+### Run RSEM (calculation of expression counts)
+ls ./chr22_Fastq/*_alignable_1.fq |xargs -I {} basename {} .fq |perl -pe s/_alignable_1//g|sort|uniq|xargs -I {} mkdir -p {}
+
+
+./RSEM-1.3.3/rsem-calculate-expression --paired-end --star --star-path ./STAR-2.7.3a/source \
+ --estimate-rspd --calc-ci --ci-memory 4096 --append-names --output-genome-bam \
+ ./chr22_Fastq/ERR204882_alignable_1.fq ./chr22_Fastq/ERR204882_alignable_2.fq \
+ ./hg38_STAR/hg38_STAR ./ERR204882/ERR204882;
+
+# if you have enough memory and threads try as below
+ls ./chr22_Fastq/*_alignable_1.fq |xargs -I {} basename {} .fq |perl -pe s/_alignable_1//g|xargs -I {} -P 7 bash -c "nohup ./RSEM-1.3.3/rsem-calculate-expression --paired-end --star --star-path ./STAR-2.7.3a/source --estimate-rspd --calc-ci --ci-memory 4096 --append-names --output-genome-bam ./chr22_Fastq/{}_alignable_1.fq ./chr22_Fastq/{}_alignable_2.fq ./hg38_STAR/hg38_STAR ./{}/{} &"
+
+
+
+
+### add sample name and data collection ###
+ls ./ERR*/ERR*.genes.results|xargs -I {} basename {} .genes.results|xargs -I {} sed -i -e "s/expected_count\t/expected_count_{}\t/g" ./{}/{}.genes.results
+ls ./ERR*/ERR*.genes.results|xargs -I {} basename {} .genes.results|xargs -I {} sed -i -e "s/TPM\t/TPM_{}\t/g" ./{}/{}.genes.results
+paste ./ERR*/ERR*.genes.results > ./all.genes.results;
+awk '{print$1"\t"$2"\t"$3"\t"$5"\t"$22"\t"$39"\t"$56"\t"$73"\t"$90"\t"$107}' all.genes.results > expected_count_all.genes.results;
+awk '{print$1"\t"$2"\t"$3"\t"$6"\t"$23"\t"$40"\t"$57"\t"$74"\t"$91"\t"$108}' all.genes.results > TPM_all.genes.results;
+ 
