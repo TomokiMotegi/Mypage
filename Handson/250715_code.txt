@@ -50,6 +50,7 @@ make ;
 cd ../ ;
 
 ## DL STAR aligner ##
+wget https://github.com/alexdobin/STAR/archive/refs/tags/2.7.3a.tar.gz
 tar -zxvf 2.7.3a.tar.gz;
 cd STAR-2.7.3a/source;
 make
